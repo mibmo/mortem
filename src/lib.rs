@@ -57,9 +57,12 @@
 //! }
 //! ```
 
-use std::ops::Drop;
 use std::env::current_exe;
 use std::fs::remove_file;
+use std::ops::Drop;
+
+#[cfg(feature = "tracing")]
+use tracing::{debug, error};
 
 /// Create a guard that when dropped tries to delete the host executable.
 ///
@@ -106,36 +109,45 @@ pub struct Guard {
 }
 
 impl Guard {
+    fn new(ensure: bool) -> Self {
+        #[cfg(feature = "tracing")]
+        debug!(?ensure, "creating mortem guard");
+        Guard { ensure }
+    }
+
     pub fn soft() -> Self {
-        Guard {
-            ensure: false,
-        }
+        Self::new(false)
     }
 
     /// Create a guard that blocks till the executable is successfully deleted
     ///
     /// See [`hard`].
     pub fn hard() -> Self {
-        Guard {
-            ensure: true,
-        }
+        Self::new(true)
     }
-
 }
 
 impl Drop for Guard {
     fn drop(&mut self) {
+        #[cfg(feature = "tracing")]
+        debug!(ensure = self.ensure, "dropping mortem guard");
+
         loop {
             match current_exe() {
                 Err(_) if self.ensure => continue,
                 Err(_) => break,
                 Ok(path) => {
                     if remove_file(path).is_err() && self.ensure {
-                        continue
+                        #[cfg(feature = "tracing")]
+                        error!(
+                            ensure = self.ensure,
+                            "failed to delete executable; retrying"
+                        );
+                        continue;
                     }
                 }
             }
-            break
+            break;
         }
     }
 }

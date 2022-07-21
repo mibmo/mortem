@@ -1,6 +1,6 @@
 [package]
 name = "mortem"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT"
 readme = "README.md"
@@ -10,6 +10,18 @@ description = "Easy self-deleting executables"
 categories = ["development-tools"]
 keywords = ["async", "cleanup", "self-deleting", "executable"]
 
+[features]
+default = []
+tracing = ["dep:tracing"]
+
 [dev-dependencies]
 tokio = { version = "1", default-features = false, features = ["macros", "rt-multi-thread"] }
 async-std = { version = "1.12", default-features = true, features = ["attributes"] }
+tracing-subscriber = { version = "0.3.15", default-features = true, features = ["fmt"] }
+
+[dependencies]
+tracing = { version = "0.1", optional = true }
+
+[[example]]
+name = "tracing"
+required-features = ["tracing"]
