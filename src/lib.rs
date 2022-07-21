@@ -135,7 +135,11 @@ impl Drop for Guard {
         loop {
             match current_exe() {
                 Err(_) if self.ensure => continue,
-                Err(_) => break,
+                Err(_) => {
+                    #[cfg(feature = "tracing")]
+                    error!(ensure = self.ensure, "failed to delete executable");
+                    panic!("failed to delete executable")
+                }
                 Ok(path) => {
                     if remove_file(path).is_err() && self.ensure {
                         #[cfg(feature = "tracing")]
