@@ -27,5 +27,8 @@ the `hard` handler keeps trying till the executable is successfully deleted.
 
 This is explained in further details in the [documentation][docs].
 
+### Tracing
+Tracing is disabled by default, but can be enabled with the `tracing` feature.
+
 ### Examples
 See the [examples directory][examples] or [documentation][docs].
